@@ -4,7 +4,7 @@ class Collection:
         collection_id: int,
         name: str,
         description: str,
-        items,
+        items: map,
     ):
         self.collection_id = collection_id
         self.name = name

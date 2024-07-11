@@ -147,3 +147,17 @@ def create_new_item():
     conn.close()
 
     print(f"[green]Item '{name}' added successfully![/green]")
+
+
+def add_items_to_collection(collection_id: int, item_ids: List[int]):
+    conn = Connection(DATABASE)
+
+    for item_id in item_ids:
+        conn.cursor.execute(
+            "INSERT INTO collection_items (collectionID, itemID) VALUES (?, ?)",
+            (collection_id, item_id),
+        )
+
+    conn.connection.commit()
+
+    print(f"[green]Items added to collection {collection_id} successfully![/green]")

@@ -39,3 +39,7 @@ backpack-cli delete ...
 ## EXPORT
 
 Create a markdown checklist with `backpack export [collection]`, to simplify packing and ensure you forget nothing
+
+### ⚠️ no backwards compatibility
+
+backpack-cli is under development, and database structure and code may change, possibly breaking compatibility.

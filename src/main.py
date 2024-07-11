@@ -6,6 +6,7 @@ from database import (
     create_new_item,
     create_collection,
     get_item,
+    get_collection,
 )
 
 
@@ -66,7 +67,7 @@ def collections():
         print("Collections in the database:")
         print()
         for collection in collections:
-            print(f"[bold]{collection[0]}[/bold] [dim]{collection[1]}[/dim]")
+            print(f"[dim]{collection.id}[/dim] [bold]{collection.name}[/bold]")
         print()
 
     else:
@@ -102,6 +103,7 @@ def collection(id):
     try:
         collection = get_collection(id)
         print(f"{collection.name}")
+        print(collection.items)
     except ValueError as e:
         click.echo(str(e))
 

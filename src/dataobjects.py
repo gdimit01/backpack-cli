@@ -36,8 +36,11 @@ class Item:
 class Connection:
     def __init__(self, database: str):
         self.connection = sqlite3.connect(database)
-        self.cursor = self.conn.cursor()
+        self.cursor = self.connection.cursor()
 
     def close(self):
         self.connection.close()
         self.cursor.close()
+
+    def commit(self):
+        self.connection.commit()

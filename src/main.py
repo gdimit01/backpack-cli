@@ -21,6 +21,12 @@ def list():
     pass
 
 
+@cli.group()
+def view():
+    """View items, collections, etc."""
+    pass
+
+
 # Group for add commands
 @cli.group()
 def add():
@@ -67,6 +73,16 @@ def item():
 @add.command()
 def collection():
     create_collection()
+
+
+@view.command()
+def collection():
+    print("viewing collection")
+
+
+@view.command()
+def item():
+    print("viewing item")
 
 
 # Subcommands under 'delete'

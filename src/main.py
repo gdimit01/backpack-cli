@@ -74,8 +74,29 @@ def cli():
     pass
 
 
-# Command to retrieve and print all items
-@cli.command()
+# Group for list commands
+@cli.group()
+def list():
+    """List items, collections, etc."""
+    pass
+
+
+# Group for add commands
+@cli.group()
+def add():
+    """Add items, collections, etc."""
+    pass
+
+
+# Group for delete commands
+@cli.group()
+def delete():
+    """Delete items, collections, etc."""
+    pass
+
+
+# Subcommands under 'list'
+@list.command()
 def items():
     items = get_all_items()
     if items:
@@ -86,14 +107,8 @@ def items():
         click.echo("No items found in the database.")
 
 
-# Command to create a new gear item into the database
-@cli.command()
-def add_item():
-    create_new_item()
-
-
-@cli.command()
-def list_collections():
+@list.command()
+def collections():
     collections = get_collections()
     if collections:
         print("Collections in the database:")
@@ -103,9 +118,28 @@ def list_collections():
         print("[red]No collections found in the database[/red]")
 
 
-@cli.command()
-def add_collection():
+# Subcommands under 'add'
+@add.command()
+def item():
+    create_new_item()
+
+
+@add.command()
+def collection():
     create_collection()
+
+
+# Subcommands under 'delete'
+@delete.command()
+def item():
+    # Implement deletion of an item
+    pass
+
+
+@delete.command()
+def collection():
+    # Implement deletion of a collection
+    pass
 
 
 if __name__ == "__main__":

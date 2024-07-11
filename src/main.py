@@ -5,6 +5,7 @@ from database import (
     get_collections,
     create_new_item,
     create_collection,
+    get_item,
 )
 
 
@@ -48,7 +49,7 @@ def items():
     if items:
         click.echo("Items in the database:")
         for item in items:
-            print(f"[dim]{item[0]}:[/dim] {item[1]} {item[2]} {item[3]}")
+            print(f"[dim]{item.id}:[/dim] {item.name} {item.weight} {item.category}")
     else:
         click.echo("No items found in the database.")
 
@@ -77,12 +78,41 @@ def collection():
 
 @view.command()
 def collection():
-    print("viewing collection")
+    collections = get_collections()
+    if collections:
+        print("Collections in the database:")
+        for collection in collections:
+            print(f"[bold]{collection[0]}[/bold] [dim]{collection[1]}[/dim]")
+    else:
+        print("[red]No collections found in the database[/red]")
+        quit
+
+    id = click.promt("Choose id of collection to view")
+    collection = get_collection(id)
 
 
+# Subcommands under 'view'
 @view.command()
-def item():
-    print("viewing item")
+@click.argument("id", required=False, type=int)
+def item(id):
+    if id is None:
+        items = get_all_items()
+        if items:
+            click.echo("Available items:")
+            for item in items:
+                print(f"[dim]{item.id}:[/dim] {item.name}")
+        else:
+            click.echo("No items found in the database.")
+
+        id = click.prompt("Enter the ID of the item you want to view", type=int)
+
+    try:
+        item = get_item(id)
+        print(
+            f"Item ID: {item.id}, Name: {item.name}, Weight: {item.weight}, Category: {item.category}"
+        )
+    except ValueError as e:
+        click.echo(str(e))
 
 
 # Subcommands under 'delete'

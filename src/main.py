@@ -2,6 +2,8 @@ import sqlite3
 import click
 from rich import print
 
+DATABASE = "backpack_cli.db"
+
 
 def get_connection(database):
     return sqlite3.connect(database)
@@ -13,12 +15,36 @@ def get_cursor(connection):
 
 # Function to get all items from the database
 def get_all_items():
-    conn = get_connection("backpack_cli.db")
+    conn = get_connection(DATABASE)
     cursor = get_cursor(conn)
     cursor.execute("SELECT itemID, name, weight, note FROM item")
     items = cursor.fetchall()
     conn.close()
     return items
+
+
+def get_collections():
+    conn = get_connection(DATABASE)
+    cursor = get_cursor(conn)
+    cursor.execute("SELECT name, description FROM collection")
+    collections = cursor.fetchall()
+    conn.close()
+    return collections
+
+
+def create_collection():
+    conn = get_connection(DATABASE)
+    cursor = get_cursor(conn)
+    name = click.prompt("Enter the name of the collection", type=str)
+    description = click.prompt("Enter the description of the collection", type=str)
+
+    cursor.execute(
+        "INSERT INTO collection (name, description) VALUES (?, ?)", (name, description)
+    )
+    conn.commit()
+    conn.close()
+
+    print(f"[green]Collection '{name}' added successfully![/green]")
 
 
 def create_new_item():
@@ -64,6 +90,22 @@ def items():
 @cli.command()
 def add_item():
     create_new_item()
+
+
+@cli.command()
+def list_collections():
+    collections = get_collections()
+    if collections:
+        print("Collections in the database:")
+        for collection in collections:
+            print(f"[bold]{collection[0]}[/bold] [dim]{collection[1]}[/dim]")
+    else:
+        print("[red]No collections found in the database[/red]")
+
+
+@cli.command()
+def add_collection():
+    create_collection()
 
 
 if __name__ == "__main__":

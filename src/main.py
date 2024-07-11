@@ -47,9 +47,13 @@ def delete():
 def items():
     items = get_all_items()
     if items:
+        print()
         click.echo("Items in the database:")
+        print()
         for item in items:
             print(f"[dim]{item.id}:[/dim] {item.name} {item.weight} {item.category}")
+        print()
+
     else:
         click.echo("No items found in the database.")
 
@@ -58,9 +62,13 @@ def items():
 def collections():
     collections = get_collections()
     if collections:
+        print()
         print("Collections in the database:")
+        print()
         for collection in collections:
             print(f"[bold]{collection[0]}[/bold] [dim]{collection[1]}[/dim]")
+        print()
+
     else:
         print("[red]No collections found in the database[/red]")
 
@@ -76,22 +84,28 @@ def collection():
     create_collection()
 
 
-@view.command()
-def collection():
-    collections = get_collections()
-    if collections:
-        print("Collections in the database:")
-        for collection in collections:
-            print(f"[bold]{collection[0]}[/bold] [dim]{collection[1]}[/dim]")
-    else:
-        print("[red]No collections found in the database[/red]")
-        quit
-
-    id = click.promt("Choose id of collection to view")
-    collection = get_collection(id)
-
-
 # Subcommands under 'view'
+@view.command()
+@click.argument("id", required=False, type=int)
+def collection(id):
+    if id is None:
+        collections = get_collections()
+        if collections:
+            click.echo("Avaible collections:")
+            for collection in collections:
+                print(f"{collection.name}")
+        else:
+            click.echo("No collections found in the database")
+
+        id = click.promt("Enter the ID of the collection you want to view", type=int)
+
+    try:
+        collection = get_collection(id)
+        print(f"{collection.name}")
+    except ValueError as e:
+        click.echo(str(e))
+
+
 @view.command()
 @click.argument("id", required=False, type=int)
 def item(id):

@@ -1,3 +1,6 @@
+import sqlite3
+
+
 class Collection:
     def __init__(
         self,
@@ -6,10 +9,12 @@ class Collection:
         description: str,
         items: map,
     ):
-        self.collection_id = collection_id
+        self.id = collection_id
         self.name = name
         self.description = description
         self.items = items
+
+        #  TODO: define methods to calculate weight and stats etc
 
 
 class Item:
@@ -26,3 +31,13 @@ class Item:
         self.weight = weight
         self.note = note
         self.category = category
+
+
+class Connection:
+    def __init__(self, database: str):
+        self.connection = sqlite3.connect(database)
+        self.cursor = self.conn.cursor()
+
+    def close(self):
+        self.connection.close()
+        self.cursor.close()

@@ -1,5 +1,7 @@
 import sqlite3
 import click
+from dataobjects import Item, Collection
+from typing import List, Dict
 
 DATABASE = "backpack_cli.db"
 
@@ -8,16 +10,11 @@ def get_connection(database=DATABASE):
     return sqlite3.connect(database)
 
 
-def get_cursor(connection=DATABASE):
-    return connection.cursor()
-
-
-def get_all_items():
+def get_cursor():
     conn = get_connection()
-    cursor = get_cursor(conn)
-    cursor.execute("SELECT itemID, name, weight, note FROM item")
-    items = cursor.fetchall()
-    conn.close()
+    return conn.cursor()
+
+
 def get_all_items() -> List[Item]:
     cursor = get_cursor()
     cursor.execute("SELECT itemID, name, weight, note, categorie FROM item")
@@ -31,12 +28,97 @@ def get_all_items() -> List[Item]:
     return items
 
 
-def get_collections():
+def get_item(item_id: int) -> Item:
+    cursor = get_cursor()
+    cursor.execute(
+        "SELECT itemID, name, weight, note, categorie FROM item where itemID= ?",
+        (item_id,),
+    )
+
+    row = cursor.fetchone()
+
+    if not row:
+        raise ValueError(f"Item with ID {item_id} not found")
+
+    item_id, name, weight, note, category = row
+    return Item(item_id, name, weight, note, category)
+
+
+def get_collection(collection_id: int) -> Collection:
+    cursor = get_cursor()
+
+    cursor.execute(
+        "SELECT collectionID, name, description FROM collection WHERE collectionID = ?",
+        (collection_id,),
+    )
+    row = cursor.fetchone()
+
+    if not row:
+        raise ValueError(f"[red]Collection with ID {collection_id} not found[/red]")
+
+    collection_id, name, description = row
+
+    # Get the items associated with the collection
+    cursor.execute(
+        """
+        SELECT i.itemID, i.name, i.weight, i.note, i.categorie
+        FROM item i
+        JOIN collection_items ci ON i.itemID = ci.item_id
+        WHERE ci.collection_id = ?
+    """,
+        (collection_id,),
+    )
+
+    items = cursor.fetchall()
+    # Organize items by category
+    items_by_category: Dict[str, List[Item]] = {}
+    for item_id, name, weight, note, category in items:
+        item = Item(item_id, name, weight, note, category)
+        if category not in items_by_category:
+            items_by_category[category] = []
+        items_by_category[category].append(item)
+
+    # Create and return the Collection object
+    return Collection(collection_id, name, description, items_by_category)
+
+
+def get_collections() -> List[Collection]:
     conn = get_connection()
     cursor = get_cursor(conn)
-    cursor.execute("SELECT name, description FROM collection")
-    collections = cursor.fetchall()
-    conn.close()
+
+    # Get all collections
+    cursor.execute("SELECT collectionID, name, description FROM collection")
+    collections_rows = cursor.fetchall()
+
+    collections = []
+
+    for collection_row in collections_rows:
+        collection_id, name, description = collection_row
+
+        # Get the items associated with the collection
+        cursor.execute(
+            """
+            SELECT i.itemID, i.name, i.weight, i.note, i.categorie
+            FROM item i
+            JOIN collection_items ci ON i.itemID = ci.item_id
+            WHERE ci.collection_id = ?
+        """,
+            (collection_id,),
+        )
+
+        items = cursor.fetchall()
+        # Organize items by category
+        items_by_category: Dict[str, List[Item]] = {}
+        for item_id, name, weight, note, category in items:
+            item = Item(item_id, name, weight, note, category)
+            if category not in items_by_category:
+                items_by_category[category] = []
+            items_by_category[category].append(item)
+
+        # Create and add the Collection object to the list
+        collection = Collection(collection_id, name, description, items_by_category)
+        collections.append(collection)
+
     return collections
 
 

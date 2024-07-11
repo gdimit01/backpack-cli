@@ -18,6 +18,16 @@ def get_all_items():
     cursor.execute("SELECT itemID, name, weight, note FROM item")
     items = cursor.fetchall()
     conn.close()
+def get_all_items() -> List[Item]:
+    cursor = get_cursor()
+    cursor.execute("SELECT itemID, name, weight, note, categorie FROM item")
+    items = []
+
+    for row in cursor.fetchall():
+        item_id, name, weight, note, category = row
+        item = Item(item_id, name, weight, note, category)
+        items.append(item)
+    cursor.close
     return items
 
 

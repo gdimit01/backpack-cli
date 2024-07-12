@@ -154,7 +154,7 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
 
     for item_id in item_ids:
         conn.cursor.execute(
-            "INSERT INTO collection_items (collectionID, itemID) VALUES (?, ?)",
+            "INSERT INTO collection_items (collection_id, item_id) VALUES (?, ?)",
             (collection_id, item_id),
         )
 

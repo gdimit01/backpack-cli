@@ -7,6 +7,7 @@ from database import (
     create_collection,
     get_item,
     get_collection,
+    add_items_to_collection,
 )
 
 
@@ -142,6 +143,26 @@ def item():
 def collection():
     # Implement deletion of a collection
     pass
+
+
+@cli.group()
+def collection():
+    """Add and remove items to collections."""
+    pass
+
+
+@collection.command("add-item")
+@click.argument("collection_id", type=int)
+@click.argument("item_ids", nargs=-1, type=int)  # Accept multiple item_ids
+def add_item_to_collection(collection_id, item_ids):
+    if not item_ids:
+        click.echo("You must provide at least one item ID.")
+        return
+
+    try:
+        add_items_to_collection(collection_id, item_ids)
+    except Exception as e:
+        click.echo(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Dict, List
 
 
 class Collection:
@@ -15,6 +16,13 @@ class Collection:
         self.items = items
 
         #  TODO: define methods to calculate weight and stats etc
+
+    def get_category_weights(self) -> Dict[str, float]:
+        weights = {}
+        for category, item_list in self.items.items():
+            total_weight = sum(item.weight for item in item_list)
+            weights[category] = total_weight
+        return weights
 
 
 class Item:

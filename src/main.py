@@ -1,7 +1,7 @@
 import sys
 
 import click
-from rich import print
+import rich
 from rich.console import Console
 from rich.text import Text
 from rich.panel import Panel
@@ -118,23 +118,18 @@ def collection(id):
         click.echo(str(e))
 
 
-def print_large_title(title_text):
-    title = Text(title_text, style="bold white on blue")
-    title.stylize("bold")  # Add underline for emphasis
-    print()
-    console.print(title)
-
 
 def view_collection(collection):
-    print(f"\n≡ [bold]{collection.name}[/bold]")
-    print(f"  [italic]{collection.description}[/italic]\n")
+    rich.print(f"\n≡ [bold]{collection.name}[/bold]")
+    rich.print(f"  [italic]{collection.description}[/italic]\n")
 
     data = transform_to_pie_data(collection.get_category_weights())
 
     collection_view.get_piechart(data)
+    print()
 
     for category, items_list in collection.items.items():
-        print(f"[dim]{category}[/dim]")
+        rich.print(f"[dim]{category}[/dim]")
         print_collection_items(items_list)
         print()
 

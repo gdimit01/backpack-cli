@@ -39,8 +39,8 @@ class Connection:
         self.cursor = self.connection.cursor()
 
     def close(self):
-        self.connection.close()
         self.cursor.close()
+        self.connection.close()
 
     def commit(self):
         self.connection.commit()

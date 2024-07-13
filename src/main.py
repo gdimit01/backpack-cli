@@ -1,7 +1,7 @@
 import click
 from rich import print
 from database import (
-    get_all_items,
+    get_items,
     get_collections,
     create_new_item,
     create_collection,
@@ -20,31 +20,23 @@ def cli():
     pass
 
 
-# Group for list commands
-@cli.group()
-def list():
-    """List items, collections, etc."""
-    pass
-
-
 @cli.group()
 def view():
     """View items, collections, etc."""
     pass
 
 
-# Group for add commands
+#  NOTE: subcommands for 'list'
+
 @cli.group()
-def add():
-    """Add items, collections, etc."""
+def list():
+    """List items, collections, etc."""
     pass
 
 
-
-# Subcommands under 'list'
 @list.command()
 def items():
-    items = get_all_items()
+    items = get_items()
     if items:
         print(f"\nItems in the database [dim]({len(items)})[/dim]:\n")
         for item in items:
@@ -61,14 +53,22 @@ def collections():
     if collections:
         print(f"\nCollections in the database [dim]({len(collections)})[/dim]:\n")
         for collection in collections:
-            print(f"[dim]{collection.id}:[/dim] [bold]{collection.name}[/bold] [italic]{collection.description}[/italic]")
+            print(
+                f"[dim]{collection.id}:[/dim] [bold]{collection.name}[/bold] [italic]{collection.description}[/italic]")
         print()
 
     else:
         print("\n[red]No collections found in the database[/red]\n")
 
 
-# Subcommands under 'add'
+#  NOTE: subcommands for 'add'
+
+@cli.group()
+def add():
+    """Add items, collections, etc."""
+    pass
+
+
 @add.command()
 def item():
     create_new_item()
@@ -77,6 +77,7 @@ def item():
 @add.command()
 def collection():
     create_collection()
+
 
 #  NOTE: subcommands for 'view'
 
@@ -96,17 +97,27 @@ def collection(id):
 
     try:
         collection = get_collection(id)
-        print(f"{collection.name}")
-        print(collection.items)
+        view_collection(collection)
     except ValueError as e:
         click.echo(str(e))
+
+
+def view_collection(collection):
+    print(f"\n[bold]{collection.name}[/bold]")
+    print(f"[italic]{collection.description}[/italic]\n")
+
+    for category, items_list in collection.items.items():
+        print(f"[bold]{category}[/bold]")
+        for item in items_list:
+            print(f"  [dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]")
+        print()  # Print a blank line between categories
 
 
 @view.command()
 @click.argument("id", required=False, type=int)
 def item(id):
     if id is None:
-        items = get_all_items()
+        items = get_items()
         if items:
             click.echo("Available items:")
             for item in items:
@@ -138,7 +149,7 @@ def delete():
 @click.argument("id", required=False, type=int)
 def item(id):
     if id is None:
-        items = get_all_items()
+        items = get_items()
         if items:
             print(f"{len(items)} available items:")
             for item in items:
@@ -182,6 +193,7 @@ def collection(id):
 def collection():
     """Add and remove items to collections."""
     pass
+
 
 @collection.command("add-item")
 @click.argument("collection_id", type=int)

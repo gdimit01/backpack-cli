@@ -3,7 +3,7 @@ from rich import print
 from database import (
     get_items,
     get_collections,
-    create_new_item,
+    create_item,
     create_collection,
     get_item,
     get_collection,
@@ -71,12 +71,20 @@ def add():
 
 @add.command()
 def item():
-    create_new_item()
+    name = click.prompt("Enter the name of the item", type=str)
+    weight = click.prompt("Enter the weight of the item", type=float)
+    category = click.prompt("Enter the category of the item", type=str)
+    note = click.prompt("Enter a note for the item", type=str)
+
+    create_item(name, weight, category, note)
 
 
 @add.command()
 def collection():
-    create_collection()
+    name = click.prompt("Enter the name of the collection", type=str)
+    description = click.prompt("Enter the description of the collection", type=str)
+
+    create_collection(name, description)
 
 
 #  NOTE: subcommands for 'view'

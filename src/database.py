@@ -37,43 +37,22 @@ def get_item(item_id: int) -> Item:
     return Item(item_id, name, weight, note, category)
 
 
-def get_collection(collection_id: int) -> Collection:
+def get_collection(id: int) -> Collection:
     conn = Connection(DATABASE)
 
     conn.cursor.execute(
         "SELECT collectionID, name, description FROM collection WHERE collectionID = ?",
-        (collection_id,),
+        (id,),
     )
     row = conn.cursor.fetchone()
 
     if not row:
-        print(f"[red]Collection with ID {collection_id} not found[/red]")
+        print(f"[red]Collection with ID {id} not found[/red]")
 
-    collection_id, name, description = row
+    id, name, description = row
+    items_by_category: Dict[str, List[Item]] = get_collection_items(id)
 
-    # Get the items associated with the collection
-    conn.cursor.execute(
-        """
-        SELECT i.itemID, i.name, i.weight, i.note, i.category
-        FROM item i
-        JOIN collection_items ci ON i.itemID = ci.item_id
-        WHERE ci.collection_id = ?
-    """,
-        (collection_id,),
-    )
-
-    items = conn.cursor.fetchall()
-    # Organize items by category
-    items_by_category: Dict[str, List[Item]] = {}
-    for item_id, name, weight, note, category in items:
-        item = Item(item_id, name, weight, note, category)
-        if category not in items_by_category:
-            items_by_category[category] = []
-        items_by_category[category].append(item)
-
-    conn.close()
-
-    return Collection(collection_id, name, description, items_by_category)
+    return Collection(id, name, description, items_by_category)
 
 
 def get_collections() -> List[Collection]:
@@ -87,39 +66,17 @@ def get_collections() -> List[Collection]:
 
     for collection_row in collections_rows:
         collection_id, name, description = collection_row
+        items_by_category: Dict[str, List[Item]] = get_collection_items(collection_id)
 
-        # Get the items associated with the collection
-        conn.cursor.execute(
-            """
-            SELECT i.itemID, i.name, i.weight, i.note, i.category
-            FROM item i
-            JOIN collection_items ci ON i.itemID = ci.item_id
-            WHERE ci.collection_id = ?
-        """,
-            (collection_id,),
-        )
-
-        items = conn.cursor.fetchall()
-        # Organize items by category
-        items_by_category: Dict[str, List[Item]] = {}
-        for item_id, name, weight, note, category in items:
-            item = Item(item_id, name, weight, note, category)
-            if category not in items_by_category:
-                items_by_category[category] = []
-            items_by_category[category].append(item)
-
-        # Create and add the Collection object to the list
         collection = Collection(collection_id, name, description, items_by_category)
         collections.append(collection)
 
+    conn.close()
     return collections
 
 
-def create_collection():
+def create_collection(name: str, description: str):
     conn = Connection(DATABASE)
-
-    name = click.prompt("Enter the name of the collection", type=str)
-    description = click.prompt("Enter the description of the collection", type=str)
 
     conn.cursor.execute(
         "INSERT INTO collection (name, description) VALUES (?, ?)", (name, description)
@@ -131,20 +88,41 @@ def create_collection():
     print(f"[green]Collection '{name}' added successfully![/green]")
 
 
-def create_new_item():
-    # Prompt the user for item details
-    name = click.prompt("Enter the name of the item", type=str)
-    weight = click.prompt("Enter the weight of the item", type=float)
-    category = click.prompt("Enter the category of the item", type=str)
-    note = click.prompt("Enter a note for the item", type=str)
-
-    # Insert the new item into the database
+def get_collection_items(id):
     conn = Connection(DATABASE)
+    conn.cursor.execute(
+        """
+        SELECT i.itemID, i.name, i.weight, i.note, i.category
+        FROM item i
+        JOIN collection_items ci ON i.itemID = ci.item_id
+        WHERE ci.collection_id = ?
+    """,
+        (id,),
+    )
+
+    items = conn.cursor.fetchall()
+    # Organize items by category
+    items_by_category: Dict[str, List[Item]] = {}
+    for item_id, name, weight, note, category in items:
+        item = Item(item_id, name, weight, note, category)
+        if category not in items_by_category:
+            items_by_category[category] = []
+        items_by_category[category].append(item)
+
+    conn.close()
+
+    return items_by_category
+
+
+def create_item(name: str, weight: float, category: str, note: str):
+    conn = Connection(DATABASE)
+
     conn.cursor.execute(
         "INSERT INTO item (name, weight, category, note) VALUES (?, ?, ?, ?)",
         (name, weight, category, note),
     )
     conn.commit()
+    conn.close()
 
     print(f"\n[green]Item '{name}' added successfully![/green]\n")
 
@@ -158,14 +136,16 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
             (collection_id, item_id),
         )
 
-    conn.connection.commit()
+    conn.commit()
+    conn.close()
 
-    print(f"\n[green]Items added to collection {collection_id} successfully![/green]\n")
+    print(f"\n[green]Items added to collection [italic]{collection_id}[/italic] successfully![/green]\n")
 
 
 def delete_item(item_id: int):
     conn = Connection(DATABASE)
 
+    # remove item from collections
     conn.cursor.execute(
         "DELETE FROM collection_items WHERE item_id = ?", (item_id,)
     )
@@ -174,7 +154,7 @@ def delete_item(item_id: int):
         "DELETE FROM item WHERE itemID = ?", (item_id,)
     )
 
-    conn.connection.commit()
+    conn.commit()
     conn.close()
 
     print(f"\n[green]Item with ID {item_id} was succesfully removed[/green]\n")
@@ -183,6 +163,7 @@ def delete_item(item_id: int):
 def delete_collection(collection_id: int):
     conn = Connection(DATABASE)
 
+    # remove items from collection
     conn.cursor.execute(
         "DELETE FROM collection_items WHERE collection_id = ?", (collection_id,)
     )
@@ -191,7 +172,7 @@ def delete_collection(collection_id: int):
         "DELETE FROM collection WHERE collectionID = ?", (collection_id,)
     )
 
-    conn.connection.commit()
+    conn.commit()
     conn.close()
 
     print(f"\n[green]Collection with ID {collection_id} was succesfully removed[/green]\n")

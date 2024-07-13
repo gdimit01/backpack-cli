@@ -3,15 +3,15 @@ import sqlite3
 
 class Collection:
     def __init__(
-        self,
-        collection_id: int,
-        name: str,
-        description: str,
-        items: map,
+            self,
+            id,
+            name,
+            desc,
+            items
     ):
-        self.id = collection_id
+        self.id = id
         self.name = name
-        self.description = description
+        self.description = desc
         self.items = items
 
         #  TODO: define methods to calculate weight and stats etc
@@ -19,12 +19,12 @@ class Collection:
 
 class Item:
     def __init__(
-        self,
-        item_id: int,
-        name: str,
-        weight: float,
-        note: str,
-        category: str,
+            self,
+            item_id: int,
+            name: str,
+            weight: float,
+            note: str,
+            category: str,
     ):
         self.id = item_id
         self.name = name

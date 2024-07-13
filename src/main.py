@@ -4,6 +4,7 @@ import click
 from rich import print
 from rich.console import Console
 from rich.text import Text
+from rich.panel import Panel
 
 from database import (
     get_items,
@@ -116,8 +117,14 @@ def collection(id):
         click.echo(str(e))
 
 
+def print_large_title(title_text):
+    title = Text(title_text, style="bold white on blue")
+    title.stylize("bold")  # Add underline for emphasis
+    console.print(title)
+
+
 def view_collection(collection):
-    print(f"\n[bold]{collection.name}[/bold]")
+    print_large_title(collection.name)
     print(f"[italic]{collection.description}[/italic]\n")
 
     for category, items_list in collection.items.items():
@@ -125,12 +132,16 @@ def view_collection(collection):
         print_items(items_list)
         print()
 
-    
 
 def print_items(items):
     for item in items:
-        item_line = f"[bold]{item.name.ljust(20)}[/bold] [dim]Weight:[/dim] {str(item.weight).ljust(10)} [italic]Note:[/italic] {item.note}"
+        formatted_weight = format_weight(item.weight)
+        item_line = f"[bold]{item.name.ljust(20)}[/bold] [dim]Weight:[/dim] [blue]{formatted_weight.ljust(10)}[/blue] [italic]Note:[/italic] {item.note}"
         console.print(item_line)
+
+
+def format_weight(weight):
+    return f"{weight / 1000:.1f} kg" if weight >= 1000 else f"{int(weight)} g"
 
 
 @view.command()

@@ -1,5 +1,10 @@
+import sys
+
 import click
 from rich import print
+from rich.console import Console
+from rich.text import Text
+
 from database import (
     get_items,
     get_collections,
@@ -11,7 +16,8 @@ from database import (
     delete_item,
     delete_collection,
 )
-import sys
+
+console = Console()
 
 
 # Click command group
@@ -116,9 +122,15 @@ def view_collection(collection):
 
     for category, items_list in collection.items.items():
         print(f"[bold]{category}[/bold]")
-        for item in items_list:
-            print(f"  [dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]")
-        print()  # Print a blank line between categories
+        print_items(items_list)
+        print()
+
+    
+
+def print_items(items):
+    for item in items:
+        item_line = f"[bold]{item.name.ljust(20)}[/bold] [dim]Weight:[/dim] {str(item.weight).ljust(10)} [italic]Note:[/italic] {item.note}"
+        console.print(item_line)
 
 
 @view.command()

@@ -8,7 +8,10 @@ from database import (
     get_item,
     get_collection,
     add_items_to_collection,
+    delete_item,
+    delete_collection,
 )
+import sys
 
 
 # Click command group
@@ -37,42 +40,32 @@ def add():
     pass
 
 
-# Group for delete commands
-@cli.group()
-def delete():
-    """Delete items, collections, etc."""
-    pass
-
 
 # Subcommands under 'list'
 @list.command()
 def items():
     items = get_all_items()
     if items:
-        print()
-        click.echo("Items in the database:")
-        print()
+        print(f"\nItems in the database [dim]({len(items)})[/dim]:\n")
         for item in items:
-            print(f"[dim]{item.id}:[/dim] {item.name} {item.weight} {item.category}")
+            print(f"[dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]")
         print()
 
     else:
-        click.echo("No items found in the database.")
+        print("\n[red]No items found in the database.[/red]\n")
 
 
 @list.command()
 def collections():
     collections = get_collections()
     if collections:
-        print()
-        print("Collections in the database:")
-        print()
+        print(f"\nCollections in the database [dim]({len(collections)})[/dim]:\n")
         for collection in collections:
-            print(f"[dim]{collection.id}[/dim] [bold]{collection.name}[/bold]")
+            print(f"[dim]{collection.id}:[/dim] [bold]{collection.name}[/bold] [italic]{collection.description}[/italic]")
         print()
 
     else:
-        print("[red]No collections found in the database[/red]")
+        print("\n[red]No collections found in the database[/red]\n")
 
 
 # Subcommands under 'add'
@@ -85,21 +78,21 @@ def item():
 def collection():
     create_collection()
 
+#  NOTE: subcommands for 'view'
 
-# Subcommands under 'view'
 @view.command()
 @click.argument("id", required=False, type=int)
 def collection(id):
     if id is None:
         collections = get_collections()
         if collections:
-            click.echo("Avaible collections:")
+            print(f"\nAvaible collections [dim]({len(collections)})[/dim]:\n")
             for collection in collections:
-                print(f"{collection.name}")
+                print(f"[bold]{collection.id}[/bold] {collection.name}")
         else:
             click.echo("No collections found in the database")
 
-        id = click.promt("Enter the ID of the collection you want to view", type=int)
+        id = click.prompt("Enter the ID of the collection you want to view", type=int)
 
     try:
         collection = get_collection(id)
@@ -120,6 +113,7 @@ def item(id):
                 print(f"[dim]{item.id}:[/dim] {item.name}")
         else:
             click.echo("No items found in the database.")
+            quit
 
         id = click.prompt("Enter the ID of the item you want to view", type=int)
 
@@ -132,24 +126,62 @@ def item(id):
         click.echo(str(e))
 
 
-# Subcommands under 'delete'
-@delete.command()
-def item():
-    # Implement deletion of an item
+#  NOTE: subcommands for 'delete'
+
+@cli.group()
+def delete():
+    """Delete items, collections, etc."""
     pass
 
 
 @delete.command()
-def collection():
-    # Implement deletion of a collection
-    pass
+@click.argument("id", required=False, type=int)
+def item(id):
+    if id is None:
+        items = get_all_items()
+        if items:
+            print(f"{len(items)} available items:")
+            for item in items:
+                print(f"[dim]{item.id}:[/dim] {item.name}")
+        else:
+            print("No items found in the database.")
+            sys.exit()
 
+        id = click.prompt("Enter the ID of the item you want to delete", type=int)
+
+    try:
+        delete_item(id)
+    except ValueError as e:
+        click.echo(str(e))
+
+
+@delete.command()
+@click.argument("id", required=False, type=int)
+def collection(id):
+    if id is None:
+        collections = get_collections()
+        if collections:
+            print(f"{len(collections)} available collections:")
+            for collection in collections:
+                print(f"[dim]{collection.id}:[/dim] {collection.name}")
+        else:
+            print("\nNo collections found in the database.\n")
+            sys.exit()
+
+        id = click.prompt("Enter the ID of the collection you want to delete", type=int)
+
+    try:
+        delete_collection(id)
+    except ValueError as e:
+        click.echo(str(e))
+
+
+#  NOTE: subcommands for "collection"
 
 @cli.group()
 def collection():
     """Add and remove items to collections."""
     pass
-
 
 @collection.command("add-item")
 @click.argument("collection_id", type=int)

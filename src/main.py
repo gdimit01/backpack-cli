@@ -126,8 +126,8 @@ def print_large_title(title_text):
 
 
 def view_collection(collection):
-    print_large_title(collection.name)
-    print(f"[italic]{collection.description}[/italic]\n")
+    print(f"\n≡ [bold]{collection.name}[/bold]")
+    print(f"  [italic]{collection.description}[/italic]\n")
 
     data = transform_to_pie_data(collection.get_category_weights())
 
@@ -135,16 +135,15 @@ def view_collection(collection):
 
     for category, items_list in collection.items.items():
         print(f"[dim]{category}[/dim]")
-        print_items(items_list)
+        print_collection_items(items_list)
         print()
 
 
-def print_items(items):
+def print_collection_items(items):
     for item in items:
         formatted_weight = collection_view.format_weight(item.weight)
-        item_line = f"[bold]{item.name.ljust(20)}[/bold] [dim]Weight:[/dim] [blue]{formatted_weight.ljust(10)}[/blue] [italic]Note:[/italic] {item.note}"
+        item_line = f"[bold]{item.name.ljust(20)}[/bold] [italic]{item.note.ljust(40)}[/italic] [blue]{formatted_weight}[/blue]"
         console.print(item_line)
-
 
 
 @view.command()

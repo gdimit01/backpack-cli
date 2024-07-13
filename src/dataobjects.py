@@ -15,8 +15,6 @@ class Collection:
         self.description = desc
         self.items = items
 
-        #  TODO: define methods to calculate weight and stats etc
-
     def get_category_weights(self) -> Dict[str, float]:
         weights = {}
         for category, item_list in self.items.items():

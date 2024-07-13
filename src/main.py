@@ -5,7 +5,8 @@ from rich import print
 from rich.console import Console
 from rich.text import Text
 from rich.panel import Panel
-
+import collection_view
+from collection_view import transform_to_pie_data
 from database import (
     get_items,
     get_collections,
@@ -127,21 +128,22 @@ def view_collection(collection):
     print_large_title(collection.name)
     print(f"[italic]{collection.description}[/italic]\n")
 
+    data = transform_to_pie_data(collection.get_category_weights())
+
+    print(collection_view.get_piechart(data))
+
     for category, items_list in collection.items.items():
-        print(f"[bold]{category}[/bold]")
+        print(f"[dim]{category}[/dim]")
         print_items(items_list)
         print()
 
 
 def print_items(items):
     for item in items:
-        formatted_weight = format_weight(item.weight)
+        formatted_weight = collection_view.format_weight(item.weight)
         item_line = f"[bold]{item.name.ljust(20)}[/bold] [dim]Weight:[/dim] [blue]{formatted_weight.ljust(10)}[/blue] [italic]Note:[/italic] {item.note}"
         console.print(item_line)
 
-
-def format_weight(weight):
-    return f"{weight / 1000:.1f} kg" if weight >= 1000 else f"{int(weight)} g"
 
 
 @view.command()

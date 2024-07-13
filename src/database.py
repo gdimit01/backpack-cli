@@ -8,7 +8,7 @@ DATABASE = "backpack_cli.db"
 
 def get_all_items() -> List[Item]:
     conn = Connection(DATABASE)
-    conn.cursor.execute("SELECT itemID, name, weight, note, categorie FROM item")
+    conn.cursor.execute("SELECT itemID, name, weight, note, category FROM item")
     items = []
 
     for row in conn.cursor.fetchall():
@@ -23,7 +23,7 @@ def get_all_items() -> List[Item]:
 def get_item(item_id: int) -> Item:
     conn = Connection(DATABASE)
     conn.cursor.execute(
-        "SELECT itemID, name, weight, note, categorie FROM item where itemID= ?",
+        "SELECT itemID, name, weight, note, category FROM item where itemID= ?",
         (item_id,),
     )
 
@@ -56,7 +56,7 @@ def get_collection(collection_id: int) -> Collection:
     # Get the items associated with the collection
     conn.cursor.execute(
         """
-        SELECT i.itemID, i.name, i.weight, i.note, i.categorie
+        SELECT i.itemID, i.name, i.weight, i.note, i.category
         FROM item i
         JOIN collection_items ci ON i.itemID = ci.item_id
         WHERE ci.collection_id = ?
@@ -77,7 +77,7 @@ def get_collection(collection_id: int) -> Collection:
 
 
 def get_collections() -> List[Collection]:
-    conn = Connection(DATABASE)
+    conn =  Connection(DATABASE)
 
     # Get all collections
     conn.cursor.execute("SELECT collectionID, name, description FROM collection")
@@ -91,7 +91,7 @@ def get_collections() -> List[Collection]:
         # Get the items associated with the collection
         conn.cursor.execute(
             """
-            SELECT i.itemID, i.name, i.weight, i.note, i.categorie
+            SELECT i.itemID, i.name, i.weight, i.note, i.category
             FROM item i
             JOIN collection_items ci ON i.itemID = ci.item_id
             WHERE ci.collection_id = ?
@@ -140,13 +140,12 @@ def create_new_item():
     # Insert the new item into the database
     conn = Connection(DATABASE)
     conn.cursor.execute(
-        "INSERT INTO item (name, weight, categorie, note) VALUES (?, ?, ?, ?)",
+        "INSERT INTO item (name, weight, category, note) VALUES (?, ?, ?, ?)",
         (name, weight, category, note),
     )
     conn.commit()
-    conn.close()
 
-    print(f"[green]Item '{name}' added successfully![/green]")
+    print(f"\n[green]Item '{name}' added successfully![/green]\n")
 
 
 def add_items_to_collection(collection_id: int, item_ids: List[int]):
@@ -160,4 +159,38 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
 
     conn.connection.commit()
 
-    print(f"[green]Items added to collection {collection_id} successfully![/green]")
+    print(f"\n[green]Items added to collection {collection_id} successfully![/green]\n")
+
+def delete_item(item_id: int):
+    conn = Connection(DATABASE)
+
+    conn.cursor.execute(
+        "DELETE FROM collection_items WHERE item_id = ?", (item_id,)
+    )
+
+    conn.cursor.execute(
+        "DELETE FROM item WHERE itemID = ?", (item_id,)
+    )
+
+    conn.connection.commit()
+    conn.close()
+
+    print(f"\n[green]Item with ID {item_id} was succesfully removed[/green]\n")
+
+
+def delete_collection(collection_id: int):
+    conn = Connection(DATABASE)
+
+    conn.cursor.execute(
+        "DELETE FROM collection_items WHERE collection_id = ?", (collection_id,)
+    )
+
+    conn.cursor.execute(
+        "DELETE FROM collection WHERE collectionID = ?", (collection_id,)
+    )
+
+    conn.connection.commit()
+    conn.close()
+
+    print(f"\n[green]Collection with ID {collection_id} was succesfully removed[/green]\n")
+

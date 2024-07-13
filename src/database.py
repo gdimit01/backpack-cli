@@ -6,7 +6,7 @@ from typing import List, Dict
 DATABASE = "backpack_cli.db"
 
 
-def get_all_items() -> List[Item]:
+def get_items() -> List[Item]:
     conn = Connection(DATABASE)
     conn.cursor.execute("SELECT itemID, name, weight, note, category FROM item")
     items = []
@@ -29,13 +29,11 @@ def get_item(item_id: int) -> Item:
 
     row = conn.cursor.fetchone()
 
-    if not row:
-        raise ValueError(f"Item with ID {item_id} not found")
+    print(f"[red]Item with ID {item_id} not found[/red]")
 
     item_id, name, weight, note, category = row
 
     conn.close()
-
     return Item(item_id, name, weight, note, category)
 
 
@@ -49,7 +47,7 @@ def get_collection(collection_id: int) -> Collection:
     row = conn.cursor.fetchone()
 
     if not row:
-        raise ValueError(f"[red]Collection with ID {collection_id} not found[/red]")
+        print(f"[red]Collection with ID {collection_id} not found[/red]")
 
     collection_id, name, description = row
 
@@ -73,11 +71,13 @@ def get_collection(collection_id: int) -> Collection:
             items_by_category[category] = []
         items_by_category[category].append(item)
 
+    conn.close()
+
     return Collection(collection_id, name, description, items_by_category)
 
 
 def get_collections() -> List[Collection]:
-    conn =  Connection(DATABASE)
+    conn = Connection(DATABASE)
 
     # Get all collections
     conn.cursor.execute("SELECT collectionID, name, description FROM collection")
@@ -126,6 +126,7 @@ def create_collection():
     )
 
     conn.commit()
+    conn.close()
 
     print(f"[green]Collection '{name}' added successfully![/green]")
 
@@ -161,6 +162,7 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
 
     print(f"\n[green]Items added to collection {collection_id} successfully![/green]\n")
 
+
 def delete_item(item_id: int):
     conn = Connection(DATABASE)
 
@@ -193,4 +195,3 @@ def delete_collection(collection_id: int):
     conn.close()
 
     print(f"\n[green]Collection with ID {collection_id} was succesfully removed[/green]\n")
-

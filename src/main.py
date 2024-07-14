@@ -118,7 +118,6 @@ def collection(id):
         click.echo(str(e))
 
 
-
 def view_collection(collection):
     rich.print(f"\n≡ [bold]{collection.name}[/bold]")
     rich.print(f"  [italic]{collection.description}[/italic]\n")

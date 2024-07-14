@@ -1,16 +1,16 @@
 from typing import List, Dict
 
-import term_piechart
+import term_piechart  # https://github.com/va-h/term-piechart
 
 
-def transform_to_pie_data(categories_weights: Dict[str, float]) -> List[dict]:
+def transform_to_pie_data(weights: Dict[str, float]) -> List[dict]:
     return [
         {"name": f"{category.ljust(10)} {format_weight(int(weight))}", "value": int(weight)}
-        for category, weight in categories_weights.items()
+        for category, weight in weights.items()
     ]
 
 
-def get_piechart(data: List[dict]):
+def get_chart(data: List[dict]):
     pie = term_piechart.Pie(
         data,
         radius=4,
@@ -21,5 +21,6 @@ def get_piechart(data: List[dict]):
     return pie
 
 
+# format weight in grams
 def format_weight(weight):
     return f"{weight / 1000:.1f} kg" if weight >= 1000 else f"{int(weight)} g"

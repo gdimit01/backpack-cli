@@ -18,6 +18,8 @@ from database import (
     delete_collection,
 )
 
+from export_commands import checklist
+
 # I am not totally sure what this rich console does or out it works.
 console = Console()
 
@@ -27,10 +29,45 @@ console = Console()
 def cli():
     pass
 
+# Register the checklist command
+cli.add_command(checklist)
+
+
+#  NOTE: subcommands for 'add'
+@cli.group()
+def add():
+    """Add items to collections"""
+    pass
+
+
+@add.command()
+@click.argument('item_ids', nargs=-1, type=int, required=False)
+@click.option('--collection', 'collection_id', type=int, help='Collection ID to add items to')
+@click.option('--interactive', is_flag=True, help='Interactive mode to select items and collections')
+def item(item_ids, collection_id, interactive):
+    """
+    Add items to a collection.
+    """
+    if interactive:
+        handle_interactive_add()
+    else:
+        if not item_ids:
+            click.echo("You must provide at least one item ID.")
+            return
+
+        if not collection_id:
+            click.echo("You must provide a collection ID.")
+            return
+
+        try:
+            add_items_to_collection(collection_id, item_ids)
+        except Exception as e:
+            click.echo(f"An error occurred: {e}")
+
 
 @cli.group()
 def view():
-    """View items, collections, etc."""
+    """View items and collections."""
     pass
 
 
@@ -38,7 +75,7 @@ def view():
 
 @cli.group()
 def list():
-    """List items, collections, etc."""
+    """List items and collections."""
     pass
 
 
@@ -71,12 +108,12 @@ def collections():
 #  NOTE: subcommands for 'add'
 
 @cli.group()
-def add():
-    """Add items, collections, etc."""
+def create():
+    """Create items and collections."""
     pass
 
 
-@add.command()
+@create.command()
 def item():
     name = click.prompt("Enter the name of the item", type=str)
     weight = click.prompt("Enter the weight of the item", type=float)
@@ -86,7 +123,7 @@ def item():
     create_item(name, weight, category, note)
 
 
-@add.command()
+@create.command()
 def collection():
     name = click.prompt("Enter the name of the collection", type=str)
     description = click.prompt("Enter the description of the collection", type=str)
@@ -98,8 +135,8 @@ def collection():
 
 @view.command()
 @click.argument("id", required=False, type=int)
-def collection(col_id):
-    if col_id is None:
+def collection(id):
+    if id is None:
         collections = get_collections()
         if collections:
             print(f"\nAvailable collections [dim]({len(collections)})[/dim]:\n")
@@ -108,10 +145,10 @@ def collection(col_id):
         else:
             click.echo("No collections found in the database")
 
-        col_id = click.prompt("Enter the ID of the collection you want to view", type=int)
+        id = click.prompt("Enter the ID of the collection you want to view", type=int)
 
     try:
-        collection = get_collection(col_id)
+        collection = get_collection(id)
         view_collection(collection)
     except ValueError as e:
         click.echo(str(e))
@@ -144,8 +181,8 @@ def print_collection_items(items):
 
 @view.command()
 @click.argument("id", required=False, type=int)
-def item(it_id):
-    if it_id is None:
+def item(id):
+    if id is None:
         items = get_items()
         if items:
             click.echo("Available items:")
@@ -155,10 +192,10 @@ def item(it_id):
             click.echo("No items found in the database.")
             sys.exit()
 
-        it_id = click.prompt("Enter the ID of the item you want to view", type=int)
+        id = click.prompt("Enter the ID of the item you want to view", type=int)
 
     try:
-        item = get_item(it_id)
+        item = get_item(id)
         print(
             f"Item ID: {item.id}, Name: {item.name}, Weight: {item.weight}, Category: {item.category}"
         )
@@ -170,14 +207,14 @@ def item(it_id):
 
 @cli.group()
 def delete():
-    """Delete items, collections, etc."""
+    """Delete items and collections."""
     pass
 
 
 @delete.command()
 @click.argument("id", required=False, type=int)
-def item(it_id):
-    if it_id is None:
+def item(id):
+    if id is None:
         items = get_items()
         if items:
             print(f"{len(items)} available items:")
@@ -187,10 +224,10 @@ def item(it_id):
             print("No items found in the database.")
             sys.exit()
 
-        it_id = click.prompt("Enter the ID of the item you want to delete", type=int)
+        id = click.prompt("Enter the ID of the item you want to delete", type=int)
 
     try:
-        delete_item(it_id)
+        delete_item(id)
     except ValueError as e:
         click.echo(str(e))
 
@@ -214,29 +251,6 @@ def collection(collection_id):
         delete_collection(collection_id)
     except ValueError as e:
         click.echo(str(e))
-
-
-#  NOTE: subcommands for "collection"
-
-@cli.group()
-def collection():
-    """Add and remove items to collections."""
-    pass
-
-
-#  TODO: implement improved "collection" logic
-@collection.command("add-item")
-@click.argument("collection_id", type=int)
-@click.argument("item_ids", nargs=-1, type=int)  # Accept multiple item_ids
-def add_item_to_collection(collection_id, item_ids):
-    if not item_ids:
-        click.echo("You must provide at least one item ID.")
-        return
-
-    try:
-        add_items_to_collection(collection_id, item_ids)
-    except Exception as e:
-        click.echo(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":

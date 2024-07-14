@@ -18,7 +18,7 @@ def get_piechart(data: List[dict]):
         autocolor_pastel_factor=0.0,
         legend={"line": 0, "format": "{percent:>5.0f}% {label} {name:<10} "},
     )
-    print(pie)
+    return pie
 
 
 def format_weight(weight):

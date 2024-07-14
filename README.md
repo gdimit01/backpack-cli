@@ -14,10 +14,10 @@ backpack-cli has a few top-level commands:
 With these, you can modify objects like items, collections, etc.
 
 ```python
-backpack-cli list [collections / items]
-backpack-cli add [collection / item]
-backpack-cli delete [collection / item]
-backpack-cli view [collection / item]
+backpack list [collections / items]
+backpack add [collection / item]
+backpack delete [collection / item]
+backpack view [collection / item]
 ```
 
 ## EXPORT

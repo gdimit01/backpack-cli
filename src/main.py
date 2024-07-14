@@ -122,7 +122,7 @@ def view_collection(collection):
 
     data = transform_to_pie_data(collection.get_category_weights())
 
-    collection_view.get_piechart(data)
+    print(collection_view.get_piechart(data))
     print()
 
     for category, items_list in collection.items.items():

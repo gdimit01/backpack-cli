@@ -18,6 +18,7 @@ from database import (
     delete_collection,
 )
 
+# I am not totally sure what this rich console does or out it works.
 console = Console()
 
 
@@ -97,20 +98,20 @@ def collection():
 
 @view.command()
 @click.argument("id", required=False, type=int)
-def collection(id):
-    if id is None:
+def collection(col_id):
+    if col_id is None:
         collections = get_collections()
         if collections:
-            print(f"\nAvaible collections [dim]({len(collections)})[/dim]:\n")
+            print(f"\nAvailable collections [dim]({len(collections)})[/dim]:\n")
             for collection in collections:
                 print(f"[bold]{collection.id}[/bold] {collection.name}")
         else:
             click.echo("No collections found in the database")
 
-        id = click.prompt("Enter the ID of the collection you want to view", type=int)
+        col_id = click.prompt("Enter the ID of the collection you want to view", type=int)
 
     try:
-        collection = get_collection(id)
+        collection = get_collection(col_id)
         view_collection(collection)
     except ValueError as e:
         click.echo(str(e))
@@ -122,7 +123,7 @@ def view_collection(collection):
 
     data = transform_to_pie_data(collection.get_category_weights())
 
-    print(collection_view.get_piechart(data))
+    print(collection_view.get_chart(data))
     print()
 
     for category, items_list in collection.items.items():
@@ -134,14 +135,17 @@ def view_collection(collection):
 def print_collection_items(items):
     for item in items:
         formatted_weight = collection_view.format_weight(item.weight)
-        item_line = f"[bold]{item.name.ljust(20)}[/bold] [italic]{item.note.ljust(40)}[/italic] [blue]{formatted_weight}[/blue]"
-        console.print(item_line)
+        name = f"[bold]{item.name.ljust(20)}[/bold]"
+        note = f"[italic]{item.note.ljust(40)}[/italic]"
+        weight = f"[blue]{formatted_weight}[/blue]"
+
+        rich.print(f"{name} {note} {weight}")
 
 
 @view.command()
 @click.argument("id", required=False, type=int)
-def item(id):
-    if id is None:
+def item(it_id):
+    if it_id is None:
         items = get_items()
         if items:
             click.echo("Available items:")
@@ -149,12 +153,12 @@ def item(id):
                 print(f"[dim]{item.id}:[/dim] {item.name}")
         else:
             click.echo("No items found in the database.")
-            quit
+            sys.exit()
 
-        id = click.prompt("Enter the ID of the item you want to view", type=int)
+        it_id = click.prompt("Enter the ID of the item you want to view", type=int)
 
     try:
-        item = get_item(id)
+        item = get_item(it_id)
         print(
             f"Item ID: {item.id}, Name: {item.name}, Weight: {item.weight}, Category: {item.category}"
         )
@@ -172,8 +176,8 @@ def delete():
 
 @delete.command()
 @click.argument("id", required=False, type=int)
-def item(id):
-    if id is None:
+def item(it_id):
+    if it_id is None:
         items = get_items()
         if items:
             print(f"{len(items)} available items:")
@@ -183,18 +187,18 @@ def item(id):
             print("No items found in the database.")
             sys.exit()
 
-        id = click.prompt("Enter the ID of the item you want to delete", type=int)
+        it_id = click.prompt("Enter the ID of the item you want to delete", type=int)
 
     try:
-        delete_item(id)
+        delete_item(it_id)
     except ValueError as e:
         click.echo(str(e))
 
 
 @delete.command()
 @click.argument("id", required=False, type=int)
-def collection(id):
-    if id is None:
+def collection(collection_id):
+    if collection_id is None:
         collections = get_collections()
         if collections:
             print(f"{len(collections)} available collections:")
@@ -204,10 +208,10 @@ def collection(id):
             print("\nNo collections found in the database.\n")
             sys.exit()
 
-        id = click.prompt("Enter the ID of the collection you want to delete", type=int)
+        collection_id = click.prompt("Enter the ID of the collection you want to delete", type=int)
 
     try:
-        delete_collection(id)
+        delete_collection(collection_id)
     except ValueError as e:
         click.echo(str(e))
 
@@ -220,6 +224,7 @@ def collection():
     pass
 
 
+#  TODO: implement improved "collection" logic
 @collection.command("add-item")
 @click.argument("collection_id", type=int)
 @click.argument("item_ids", nargs=-1, type=int)  # Accept multiple item_ids

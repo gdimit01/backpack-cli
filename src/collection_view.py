@@ -1,16 +1,13 @@
-import term_piechart
 from typing import List, Dict
-from database import get_collection
+
+import term_piechart
 
 
 def transform_to_pie_data(categories_weights: Dict[str, float]) -> List[dict]:
-    data = []
-    for category, weight in categories_weights.items():
-        name = f"{category.ljust(10)} {format_weight(int(weight))}"
-        value = int(weight)
-
-        data.append({"name": name, "value": value})
-    return data
+    return [
+        {"name": f"{category.ljust(10)} {format_weight(int(weight))}", "value": int(weight)}
+        for category, weight in categories_weights.items()
+    ]
 
 
 def get_piechart(data: List[dict]):

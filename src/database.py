@@ -1,7 +1,8 @@
-import click
-from rich import print
-from dataobjects import Item, Collection, Connection
 from typing import List, Dict
+
+from rich import print
+
+from dataobjects import Item, Collection, Connection
 
 DATABASE = "backpack_cli.db"
 

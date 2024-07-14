@@ -3,8 +3,7 @@ import sys
 import click
 import rich
 from rich.console import Console
-from rich.text import Text
-from rich.panel import Panel
+
 import collection_view
 from collection_view import transform_to_pie_data
 from database import (
@@ -46,27 +45,26 @@ def list():
 def items():
     items = get_items()
     if items:
-        print(f"\nItems in the database [dim]({len(items)})[/dim]:\n")
+        rich.print(f"\nItems in the database [dim]({len(items)})[/dim]:\n")
         for item in items:
-            print(f"[dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]")
-        print()
+            rich.print(f"[dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]\n")
 
     else:
-        print("\n[red]No items found in the database.[/red]\n")
+        rich.print("\n[red]No items found in the database.[/red]\n")
 
 
 @list.command()
 def collections():
     collections = get_collections()
     if collections:
-        print(f"\nCollections in the database [dim]({len(collections)})[/dim]:\n")
+        rich.print(f"\nCollections in the database [dim]({len(collections)})[/dim]:\n")
         for collection in collections:
-            print(
+            rich.print(
                 f"[dim]{collection.id}:[/dim] [bold]{collection.name}[/bold] [italic]{collection.description}[/italic]")
         print()
 
     else:
-        print("\n[red]No collections found in the database[/red]\n")
+        rich.print("\n[red]No collections found in the database[/red]\n")
 
 
 #  NOTE: subcommands for 'add'

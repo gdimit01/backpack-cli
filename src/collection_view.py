@@ -3,7 +3,7 @@ from typing import List, Dict
 import term_piechart  # https://github.com/va-h/term-piechart
 
 
-def transform_to_pie_data(weights: Dict[str, float]) -> List[dict]:
+def get_pie_data(weights: Dict[str, float]) -> List[dict]:
     return [
         {"name": f"{category.ljust(10)} {format_weight(int(weight))}", "value": int(weight)}
         for category, weight in weights.items()

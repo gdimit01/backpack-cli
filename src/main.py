@@ -5,7 +5,7 @@ import rich
 from rich.console import Console
 
 import collection_view
-from collection_view import transform_to_pie_data
+from collection_view import get_pie_data
 from database import (
     get_items,
     get_collections,
@@ -121,7 +121,7 @@ def view_collection(collection):
     rich.print(f"\n≡ [bold]{collection.name}[/bold]")
     rich.print(f"  [italic]{collection.description}[/italic]\n")
 
-    data = transform_to_pie_data(collection.get_category_weights())
+    data = get_pie_data(collection.get_category_weights())
 
     print(collection_view.get_chart(data))
     print()

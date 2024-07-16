@@ -184,34 +184,9 @@ def collection(id):
 
     try:
         collection = get_collection(id)
-        view_collection(collection)
+        collection_view.print_collection(collection)
     except ValueError as e:
         click.echo(str(e))
-
-
-def view_collection(collection):
-    rich.print(f"\n≡ [bold]{collection.name}[/bold]")
-    rich.print(f"  [italic]{collection.description}[/italic]\n")
-
-    data = get_pie_data(collection.get_category_weights())
-
-    print(collection_view.get_chart(data))
-    print()
-
-    for category, items_list in collection.items.items():
-        rich.print(f"[dim]{category}[/dim]")
-        print_collection_items(items_list)
-        print()
-
-
-def print_collection_items(items):
-    for item in items:
-        formatted_weight = collection_view.format_weight(item.weight)
-        name = f"[bold]{item.name.ljust(20)}[/bold]"
-        note = f"[italic]{item.note.ljust(40)}[/italic]"
-        weight = f"[blue]{formatted_weight}[/blue]"
-
-        rich.print(f"{name} {note} {weight}")
 
 
 @view.command()

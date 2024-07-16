@@ -41,9 +41,6 @@ class Item:
     def __str__(self):
         return f"{self.id}: {self.name}, {self.weight}"
 
-    def __repr__(self):
-        return self.__str__()
-
 
 class Connection:
     def __init__(self, database: str):

@@ -24,10 +24,9 @@ class TestCollection(unittest.TestCase):
     collection = Collection(1, "Camping Gear", "Essential camping items", items)
 
     def test_collection_creation(self):
-        collection = Collection(5, "Kungsleden", "Swedens King Trail", {})
-        self.assertEqual(collection.id, 5)
-        self.assertEqual(collection.name, "Kungsleden")
-        self.assertEqual(collection.description, "Swedens King Trail")
+        self.assertEqual(self.collection.id, 1)
+        self.assertEqual(self.collection.name, "Camping Gear")
+        self.assertEqual(self.collection.description, "Essential camping items")
 
     def test_get_category_weights(self):
         expected_weights = {
@@ -37,9 +36,8 @@ class TestCollection(unittest.TestCase):
         self.assertEqual(self.collection.get_category_weights(), expected_weights)
 
     def test_get_total_weight(self):
-        collection = Collection(1, "Camping Gear", "Essential camping items", self.items)
         expected_total_weight = 4000.0
-        self.assertEqual(collection.get_total_weight(), expected_total_weight)
+        self.assertEqual(self.collection.get_total_weight(), expected_total_weight)
 
 
 class TestConnection(unittest.TestCase):

@@ -5,7 +5,6 @@ import rich
 from rich.console import Console
 
 import collection_view
-from collection_view import get_pie_data
 from database import (
     get_items,
     get_collections,
@@ -18,7 +17,6 @@ from database import (
     delete_collection,
     remove_items_from_collection
 )
-
 from export_commands import checklist
 
 console = Console()

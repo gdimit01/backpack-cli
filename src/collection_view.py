@@ -4,7 +4,7 @@ import rich
 import term_piechart  # https://github.com/va-h/term-piechart
 
 
-# Needed to format data correctly for piechart -> {"name": name, "value": value}
+# Format data correctly for piechart -> {"name": name, "value": value}
 def get_pie_data(weights: Dict[str, float]) -> List[dict]:
     return [
         {"name": f"{category.ljust(10)} {format_weight(int(weight))}", "value": int(weight)}

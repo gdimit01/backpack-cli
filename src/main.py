@@ -146,6 +146,7 @@ def create():
     pass
 
 
+#  TODO: named arguments
 @create.command()
 def item():
     name = click.prompt("Enter the name of the item", type=str)
@@ -156,6 +157,7 @@ def item():
     create_item(name, weight, category, note)
 
 
+#  TODO: named arguments '-n' and '-d' for name and description
 @create.command()
 def collection():
     name = click.prompt("Enter the name of the collection", type=str)

@@ -20,7 +20,6 @@ from database import (
 
 from export_commands import checklist
 
-# I am not totally sure what this rich console does or out it works.
 console = Console()
 
 
@@ -63,6 +62,7 @@ def item(item_ids, collection_id, interactive):
             add_items_to_collection(collection_id, item_ids)
         except Exception as e:
             click.echo(f"An error occurred: {e}")
+
 
 
 @cli.group()

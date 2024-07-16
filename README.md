@@ -6,12 +6,12 @@ local terminal alternative to options like lighterpack
 
 backpack-cli has a few top-level commands:
 
-- list *lists items and collections*
-- add *add items to collections*
-- remove *remove items from collections*
-- create *create items and collections*
-- delete *delete items and collections*
-- view *view items and collections*
+- list      *lists items and collections*
+- add       *add items to collections*
+- remove    *remove items from collections*
+- create    *create items and collections*
+- delete    *delete items and collections*
+- view      *view items and collections*
 - checklist *export a markdown checklist*
 
 With these, you can interact with your database.

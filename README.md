@@ -17,12 +17,12 @@ backpack-cli has a few top-level commands:
 With these, you can interact with your database.
 
 ```python
-backpack list [collections / items]
-backpack add item 1 2 --collection 4
+backpack list   [collections / items]
+backpack add    item 1 2 --collection 4
 backpack remove item 4 5 --collection 6
 backpack create [collection / item]
 backpack delete [collection / item]
-backpack view [collection / item]
+backpack view   [collection / item]
 ```
 
 ## EXPORT

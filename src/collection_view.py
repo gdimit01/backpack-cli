@@ -27,9 +27,10 @@ def print_collection(collection):
     rich.print(f"  [italic]{collection.description}[/italic]\n")
 
     data = get_pie_data(collection.get_category_weights())
-
     print(generate_chart(data))
-    print()
+
+    total_weight = format_weight(collection.get_total_weight())
+    print(f"Total weight: {total_weight}\n")
 
     for category, items_list in collection.items.items():
         rich.print(f"[dim]{category}[/dim]")

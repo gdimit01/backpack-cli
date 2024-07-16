@@ -1,5 +1,8 @@
 # backpack-cli
 
+<!-- README.md -->
++ [![cov](https://https://kaya-sem.github.io/backpack-cli//badges/coverage.svg)](https://github.com/Kaya-Sem/backpack-cli/actions)
+
 local terminal alternative to options like lighterpack
 
 ## USAGE

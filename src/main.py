@@ -16,6 +16,7 @@ from database import (
     add_items_to_collection,
     delete_item,
     delete_collection,
+    remove_items_from_collection
 )
 
 from export_commands import checklist
@@ -27,6 +28,7 @@ console = Console()
 @click.group()
 def cli():
     pass
+
 
 # Register the checklist command
 cli.add_command(checklist)
@@ -63,6 +65,37 @@ def item(item_ids, collection_id, interactive):
         except Exception as e:
             click.echo(f"An error occurred: {e}")
 
+
+#  NOTE: subcommands for 'add'
+@cli.group()
+def remove():
+    """Remove items from collections"""
+    pass
+
+
+@remove.command()
+@click.argument('item_ids', nargs=-1, type=int, required=False)
+@click.option('--collection', 'collection_id', type=int, help='Collection ID to remote items from')
+@click.option('--interactive', is_flag=True, help='Interactive mode to select items and collections')
+def item(item_ids, collection_id, interactive):
+    """
+    Remove items from a collection.
+    """
+    if interactive:
+        handle_interactive_add()
+    else:
+        if not item_ids:
+            click.echo("You must provide at least one item ID.")
+            return
+
+        if not collection_id:
+            click.echo("You must provide a collection ID.")
+            return
+
+        try:
+            remove_items_from_collection(collection_id, item_ids)
+        except Exception as e:
+            click.echo(f"An error occurred: {e}")
 
 
 @cli.group()

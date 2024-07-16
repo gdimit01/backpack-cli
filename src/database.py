@@ -128,6 +128,38 @@ def create_item(name: str, weight: float, category: str, note: str):
     print(f"\n[green]Item '{name}' added successfully![/green]\n")
 
 
+def remove_items_from_collection(collection_id: int, item_ids: List[int]):
+    conn = Connection(DATABASE)
+
+    removed_count = 0
+    skipped_count = 0
+
+    for item_id in item_ids:
+        # Check if the item is present in the collection
+        conn.cursor.execute(
+            "SELECT COUNT(*) FROM collection_items WHERE collection_id = ? AND item_id = ?",
+            (collection_id, item_id),
+        )
+        exists = conn.cursor.fetchone()[0]
+
+        if exists:
+            conn.cursor.execute(
+                "DELETE FROM collection_items WHERE collection_id = ? AND item_id = ?",
+                (collection_id, item_id),
+            )
+            removed_count += 1
+        else:
+            skipped_count += 1
+
+    conn.commit()
+    conn.close()
+
+    if removed_count > 0:
+        print(
+            f"\n[green]{removed_count} item(s) removed from collection [italic]{collection_id}[/italic] successfully![/green]")
+    if skipped_count > 0:
+        print(f"\n[yellow]{skipped_count} item(s) were not in the collection and were skipped.[/yellow]\n")
+
 
 def add_items_to_collection(collection_id: int, item_ids: List[int]):
     conn = Connection(DATABASE)
@@ -142,7 +174,7 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
             (collection_id, item_id),
         )
         exists = conn.cursor.fetchone()[0]
-        
+
         if exists:
             skipped_count += 1
         else:
@@ -156,7 +188,8 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
     conn.close()
 
     if added_count > 0:
-        print(f"\n[green]{added_count} item(s) added to collection [italic]{collection_id}[/italic] successfully![/green]")
+        print(
+            f"\n[green]{added_count} item(s) added to collection [italic]{collection_id}[/italic] successfully![/green]")
     if skipped_count > 0:
         print(f"\n[yellow]{skipped_count} item(s) were already in the collection and were skipped.[/yellow]\n")
 

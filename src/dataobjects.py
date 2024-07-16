@@ -18,6 +18,10 @@ class Collection:
     def get_category_weights(self) -> Dict[str, float]:
         return {category: sum(item.weight for item in item_list) for category, item_list in self.items.items()}
 
+    def get_total_weight(self) -> int:
+        return sum(sum(item.weight for item in item_list) for _, item_list in
+                   self.items.items())
+
 
 class Item:
     def __init__(

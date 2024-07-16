@@ -128,24 +128,43 @@ def create_item(name: str, weight: float, category: str, note: str):
     print(f"\n[green]Item '{name}' added successfully![/green]\n")
 
 
+
 def add_items_to_collection(collection_id: int, item_ids: List[int]):
     conn = Connection(DATABASE)
 
+    added_count = 0
+    skipped_count = 0
+
     for item_id in item_ids:
+        # Check if the item is already in the collection
         conn.cursor.execute(
-            "INSERT INTO collection_items (collection_id, item_id) VALUES (?, ?)",
+            "SELECT COUNT(*) FROM collection_items WHERE collection_id = ? AND item_id = ?",
             (collection_id, item_id),
         )
+        exists = conn.cursor.fetchone()[0]
+        
+        if exists:
+            skipped_count += 1
+        else:
+            conn.cursor.execute(
+                "INSERT INTO collection_items (collection_id, item_id) VALUES (?, ?)",
+                (collection_id, item_id),
+            )
+            added_count += 1
 
     conn.commit()
     conn.close()
 
-    print(f"\n[green]Items added to collection [italic]{collection_id}[/italic] successfully![/green]\n")
+    if added_count > 0:
+        print(f"\n[green]{added_count} item(s) added to collection [italic]{collection_id}[/italic] successfully![/green]")
+    if skipped_count > 0:
+        print(f"\n[yellow]{skipped_count} item(s) were already in the collection and were skipped.[/yellow]\n")
 
 
 def delete_item(item_id: int):
     conn = Connection(DATABASE)
 
+    #  TODO: items should not be removed, rather 'archived'
     # remove item from collections
     conn.cursor.execute(
         "DELETE FROM collection_items WHERE item_id = ?", (item_id,)

@@ -26,18 +26,19 @@ def get_items() -> List[Item]:
 def get_item(item_id: int) -> Item:
     conn = Connection(DATABASE)
     conn.cursor.execute(
-        "SELECT id, name, weight, note, category FROM item where id= ?",
+        "SELECT id, name, weight, note, category FROM items where id= ?",
         (item_id,),
     )
 
     row = conn.cursor.fetchone()
 
-    print(f"[red]Item with ID {item_id} not found[/red]")
-
-    item_id, name, weight, note, category = row
-
-    conn.close()
-    return Item(item_id, name, weight, note, category)
+    if row:
+        item_id, name, weight, note, category = row
+        conn.close()
+        return Item(item_id, name, weight, note, category)
+    else:
+        print(f"[red]Item with ID {item_id} not found[/red]")
+        conn.close()
 
 
 def get_collection(id: int) -> Collection:
@@ -136,6 +137,27 @@ def create_item(name: str, weight: int, category: str, note: str) -> int:
     return item_id
 
 
+def get_collection_items_as_list(collection_id: int) -> List[Item]:
+    conn = Connection(DATABASE)
+
+    conn.cursor.execute(
+        """
+        SELECT i.id, i.name, i.weight, i.note, i.category
+        FROM items i
+        JOIN collection_items ci ON i.id = ci.item_id
+        WHERE ci.collection_id = ?
+    """,
+        (collection_id,),
+    )
+
+    items_rows = conn.cursor.fetchall()
+    items = [Item(item_id, name, weight, note, category) for item_id, name, weight, note, category in items_rows]
+
+    conn.close()
+
+    return items
+
+
 def remove_items_from_collection(collection_id: int, item_ids: List[int]):
     conn = Connection(DATABASE)
 
@@ -201,10 +223,10 @@ def add_items_to_collection(collection_id: int, item_ids: List[int]):
     conn.close()
 
     if added_count > 0:
-        print(
+        rich.print(
             f"\n[green]{added_count} item(s) added to collection [italic]{collection_id}[/italic] successfully![/green]")
     if skipped_count > 0:
-        print(f"\n[yellow]{skipped_count} item(s) were already in the collection and were skipped.[/yellow]\n")
+        rich.print(f"\n[yellow]{skipped_count} item(s) were already in the collection and were skipped.[/yellow]\n")
 
 
 def delete_item(item_id: int):
@@ -252,16 +274,6 @@ def get_categories() -> List[str]:
 
 
 def handle_interactive_add():
-    item_ids = []
-    collection_id = None
-
-    items = get_items()
-    rich.print(f"\n[underline]Choose items to add to a collection:[/underline]\n")
-    print_items(items)
-
-    print(f"\nSeparate id's with spaces")
-    response = click.prompt("Item IDs")
-
     rich.print(f"\n[underline]Choose a collection to add items to:[/underline]\n")
 
     collections = get_collections()
@@ -270,4 +282,47 @@ def handle_interactive_add():
     print()
     collection_id = click.prompt("Collection ID", type=int)
 
+    items = get_items()
+    rich.print(f"\n[underline]Choose items to add to a collection:[/underline]\n")
+    print_items(items)
+
+    rich.print(f"\nSeparate IDs with spaces")
+    response = click.prompt("Item IDs")
+
+    # Convert the response string into a list of integers
+    try:
+        item_ids = [int(item_id) for item_id in response.split()]
+    except ValueError:
+        print(f"\n[red]Invalid input. Please enter numbers separated by spaces.[/red]\n")
+        return
+
     add_items_to_collection(collection_id, item_ids)
+
+
+#  TODO: check if there's actually any items in the collection
+def handle_interactive_remove():
+    rich.print(f"\n[underline]Choose a collection to remove items from:[/underline]\n")
+
+    collections = get_collections()
+    print_collections(collections)
+
+    print()
+
+    collection_id = click.prompt("Collection ID", type=int)
+    print()
+
+    rich.print(f"\n[underline]Choose items to add to a collection:[/underline]\n")
+    items = get_collection_items_as_list(collection_id)
+    print_items(items)
+
+    print(f"\nSeparate IDs with spaces")
+    response = click.prompt("Item IDs")
+
+    # Convert the response string into a list of integers
+    try:
+        item_ids = [int(item_id) for item_id in response.split()]
+    except ValueError:
+        rich.print(f"\n[red]Invalid input. Please enter numbers separated by spaces.[/red]\n")
+        return
+
+    remove_items_from_collection(collection_id, item_ids)

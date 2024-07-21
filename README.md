@@ -4,6 +4,9 @@ backpack-cli is a command-line tool designed for managing and organizing your co
 
 ![image](https://github.com/user-attachments/assets/804e2197-db11-43e9-87a6-88a6f59ee2b5)
 
+## Downloading
+
+I am not providing any binaries as of yet. Please download the repository and use in-folder to experiment with the given database.
 
 ## USAGE
 

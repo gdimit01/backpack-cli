@@ -2,7 +2,6 @@ import sqlite3
 
 
 def initialize_database(db_path: str):
-    # SQL statements to create the tables
     sql_statements = """
     CREATE TABLE "collection_items" (
         "collection_id" INTEGER,
@@ -34,3 +33,5 @@ def initialize_database(db_path: str):
 
     conn.commit()
     conn.close()
+
+initialize_database("backpack_cli.db")

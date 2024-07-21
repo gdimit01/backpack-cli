@@ -1,6 +1,8 @@
-from typing import List, Dict
-from dataobjects import Item
+from typing import List
+
 import rich
+
+from dataobjects import Item
 
 
 def print_items(items: List[Item]):

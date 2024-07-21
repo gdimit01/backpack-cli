@@ -1,5 +1,5 @@
 import unittest
-from collection_view import get_pie_data, format_weight
+from collection import get_pie_data, format_weight
 
 
 class TestGetPieData(unittest.TestCase):

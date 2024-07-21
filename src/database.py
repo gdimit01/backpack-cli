@@ -78,17 +78,19 @@ def get_collections() -> List[Collection]:
     return collections
 
 
-def create_collection(name: str, description: str):
+def create_collection(name: str, description: str) -> int:
     conn = Connection(DATABASE)
 
     conn.cursor.execute(
         "INSERT INTO collections (name, description) VALUES (?, ?)", (name, description)
     )
 
+    collection_id = conn.cursor.lastrowid
+
     conn.commit()
     conn.close()
 
-    print(f"[green]Collection '{name}' added successfully![/green]")
+    return collection_id
 
 
 def get_collection_items(id):
@@ -131,7 +133,6 @@ def create_item(name: str, weight: int, category: str, note: str) -> int:
     conn.commit()
     conn.close()
 
-    print(f"\n[green]Item '{name}' added successfully with ID {item_id}![/green]\n")
     return item_id
 
 
@@ -163,7 +164,8 @@ def remove_items_from_collection(collection_id: int, item_ids: List[int]):
 
     if removed_count > 0:
         rich.print(
-            f"\n[green]{removed_count} item(s) removed from collection [italic]{collection_id}[/italic] successfully![/green]")
+            f"\n[green]{removed_count} item(s) removed from collection [italic]{collection_id}[/italic] "
+            f"successfully![/green]")
     if skipped_count > 0:
         rich.print(f"\n[yellow]{skipped_count} item(s) were not in the collection and were skipped.[/yellow]\n")
 
@@ -221,7 +223,7 @@ def delete_item(item_id: int):
     conn.commit()
     conn.close()
 
-    print(f"\n[green]Item with ID {item_id} was succesfully removed[/green]\n")
+    rich.print(f"\n[green]Item with ID {item_id} was succesfully removed[/green]\n")
 
 
 def delete_collection(collection_id: int):
@@ -239,7 +241,14 @@ def delete_collection(collection_id: int):
     conn.commit()
     conn.close()
 
-    print(f"\n[green]Collection with ID {collection_id} was succesfully removed[/green]\n")
+
+def get_categories() -> List[str]:
+    conn = Connection(DATABASE)
+    conn.cursor.execute("SELECT DISTINCT category FROM items")
+    categories = [row[0] for row in conn.cursor.fetchall()]
+    conn.close()
+
+    return categories
 
 
 def handle_interactive_add():

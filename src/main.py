@@ -4,7 +4,8 @@ import click
 import rich
 from rich.console import Console
 
-import collection_view
+from item import print_items
+from collection import print_collections, print_collection_view
 from database import (
     get_items,
     get_collections,
@@ -15,9 +16,12 @@ from database import (
     add_items_to_collection,
     delete_item,
     delete_collection,
-    remove_items_from_collection
+    remove_items_from_collection,
+    handle_interactive_add,
+    get_categories
 )
 from export_commands import checklist
+from dataobjects import Collection
 
 console = Console()
 
@@ -28,8 +32,9 @@ def cli():
     pass
 
 
+#  TODO: fix
 # Register the checklist command
-cli.add_command(checklist)
+# cli.add_command(checklist)
 
 
 #  NOTE: subcommands for 'add'
@@ -115,11 +120,20 @@ def items():
     items = get_items()
     if items:
         rich.print(f"\nItems in the database [dim]({len(items)})[/dim]:\n")
-        for item in items:
-            rich.print(f"[dim]{item.id}:[/dim] [bold]{item.name}[/bold] [italic]{item.note}[/italic]\n")
+        print_items(items)
 
     else:
         rich.print("\n[red]No items found in the database.[/red]\n")
+
+@list.command()
+def categories():
+    categories = get_categories()
+    if categories:
+        console.print("\nCategories in the database:\n")
+        for category in categories:
+            console.print(f"- {category}")
+    else:
+        console.print("\n[red]There are no categories in the database.[/red]\n")
 
 
 @list.command()
@@ -127,9 +141,7 @@ def collections():
     collections = get_collections()
     if collections:
         rich.print(f"\nCollections in the database [dim]({len(collections)})[/dim]:\n")
-        for collection in collections:
-            rich.print(
-                f"[dim]{collection.id}:[/dim] [bold]{collection.name}[/bold] [italic]{collection.description}[/italic]")
+        print_collections(collections)
         print()
 
     else:
@@ -148,20 +160,32 @@ def create():
 @create.command()
 def item():
     name = click.prompt("Enter the name of the item", type=str)
-    weight = click.prompt("Enter the weight of the item", type=float)
+    weight = click.prompt("Enter the weight of the item", type=int)
     category = click.prompt("Enter the category of the item", type=str)
     note = click.prompt("Enter a note for the item", type=str)
 
-    create_item(name, weight, category, note)
+    item_id = create_item(name, weight, category, note)
+
+    if item_id:
+        rich.print(f"\n[green]Item '{name}' added successfully with ID {item_id}![/green]\n")
+    else:
+        rich.print(f"\n[red]Item '{name}' could not be added![/red]\n")
 
 
-#  TODO: named arguments '-n' and '-d' for name and description
 @create.command()
-def collection():
-    name = click.prompt("Enter the name of the collection", type=str)
-    description = click.prompt("Enter the description of the collection", type=str)
+@click.option('-n', '--name', type=str, help='Name of the collection')
+@click.option('-d', '--description', type=str, help='Description of the collection')
+@click.option('-i', '--interactive', is_flag=True, help='Interactive mode')
+def collection(name, description, interactive):
+    if interactive:
+        name = click.prompt("Enter the name of the collection", type=str)
+        description = click.prompt("Enter the description of the collection", type=str)
+    elif not name or not description:
+        raise click.UsageError("In non-interactive mode, both --name and --description must be provided.")
 
-    create_collection(name, description)
+    collection_id = create_collection(name, description)
+
+    rich.print(f"[green]Collection '{name}' with ID {collection_id} was created successfully![/green]")
 
 
 #  NOTE: subcommands for 'view'
@@ -181,8 +205,8 @@ def collection(id):
         id = click.prompt("Enter the ID of the collection you want to view", type=int)
 
     try:
-        collection = get_collection(id)
-        collection_view.print_collection(collection)
+        col: Collection = get_collection(id)
+        print_collection_view(col)
     except ValueError as e:
         click.echo(str(e))
 
@@ -194,8 +218,7 @@ def item(id):
         items = get_items()
         if items:
             click.echo("Available items:")
-            for item in items:
-                print(f"[dim]{item.id}:[/dim] {item.name}")
+            print_items(items)
         else:
             click.echo("No items found in the database.")
             sys.exit()
@@ -242,8 +265,8 @@ def item(id):
 
 @delete.command()
 @click.argument("id", required=False, type=int)
-def collection(collection_id):
-    if collection_id is None:
+def collection(id):
+    if id is None:
         collections = get_collections()
         if collections:
             print(f"{len(collections)} available collections:")
@@ -253,10 +276,11 @@ def collection(collection_id):
             print("\nNo collections found in the database.\n")
             sys.exit()
 
-        collection_id = click.prompt("Enter the ID of the collection you want to delete", type=int)
+        id = click.prompt("Enter the ID of the collection you want to delete", type=int)
 
     try:
-        delete_collection(collection_id)
+        delete_collection(id)
+        rich.print(f"\n[green]Collection with ID {id} was succesfully removed[/green]\n")
     except ValueError as e:
         click.echo(str(e))
 

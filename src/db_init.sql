@@ -12,15 +12,11 @@ CREATE TABLE "collection"
     description  TEXT,
     name         TEXT not null
 )
-CREATE TABLE "categories" (
-	"categoryID"	INTEGER,
-	"name"	TEXT,
-	PRIMARY KEY("categoryID" AUTOINCREMENT)
-)
+
 CREATE TABLE "item" (
 	"itemID"	INTEGER,
 	"name"	TEXT,
-	"weight"	REAL,
+	"weight"	INTEGER,
 	"note"	TEXT,
 	"category"	TEXT,
 	PRIMARY KEY("itemID" AUTOINCREMENT)

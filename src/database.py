@@ -1,7 +1,9 @@
 from typing import List, Dict
+from collection import print_collections
+from item import print_items
+import click
 
-from rich import print
-
+import rich
 from dataobjects import Item, Collection, Connection
 
 DATABASE = "backpack_cli.db"
@@ -9,7 +11,7 @@ DATABASE = "backpack_cli.db"
 
 def get_items() -> List[Item]:
     conn = Connection(DATABASE)
-    conn.cursor.execute("SELECT itemID, name, weight, note, category FROM item")
+    conn.cursor.execute("SELECT id, name, weight, note, category FROM items")
     items = []
 
     for row in conn.cursor.fetchall():
@@ -24,7 +26,7 @@ def get_items() -> List[Item]:
 def get_item(item_id: int) -> Item:
     conn = Connection(DATABASE)
     conn.cursor.execute(
-        "SELECT itemID, name, weight, note, category FROM item where itemID= ?",
+        "SELECT id, name, weight, note, category FROM item where id= ?",
         (item_id,),
     )
 
@@ -42,7 +44,7 @@ def get_collection(id: int) -> Collection:
     conn = Connection(DATABASE)
 
     conn.cursor.execute(
-        "SELECT collectionID, name, description FROM collection WHERE collectionID = ?",
+        "SELECT id, name, description FROM collections WHERE id = ?",
         (id,),
     )
     row = conn.cursor.fetchone()
@@ -60,7 +62,7 @@ def get_collections() -> List[Collection]:
     conn = Connection(DATABASE)
 
     # Get all collections
-    conn.cursor.execute("SELECT collectionID, name, description FROM collection")
+    conn.cursor.execute("SELECT id, name, description FROM collections")
     collections_rows = conn.cursor.fetchall()
 
     collections = []
@@ -80,7 +82,7 @@ def create_collection(name: str, description: str):
     conn = Connection(DATABASE)
 
     conn.cursor.execute(
-        "INSERT INTO collection (name, description) VALUES (?, ?)", (name, description)
+        "INSERT INTO collections (name, description) VALUES (?, ?)", (name, description)
     )
 
     conn.commit()
@@ -93,9 +95,9 @@ def get_collection_items(id):
     conn = Connection(DATABASE)
     conn.cursor.execute(
         """
-        SELECT i.itemID, i.name, i.weight, i.note, i.category
-        FROM item i
-        JOIN collection_items ci ON i.itemID = ci.item_id
+        SELECT i.id, i.name, i.weight, i.note, i.category
+        FROM items i
+        JOIN collection_items ci ON i.id = ci.item_id
         WHERE ci.collection_id = ?
     """,
         (id,),
@@ -115,17 +117,22 @@ def get_collection_items(id):
     return items_by_category
 
 
-def create_item(name: str, weight: float, category: str, note: str):
+# creates item in database and returns it generated id.
+def create_item(name: str, weight: int, category: str, note: str) -> int:
     conn = Connection(DATABASE)
 
     conn.cursor.execute(
-        "INSERT INTO item (name, weight, category, note) VALUES (?, ?, ?, ?)",
+        "INSERT INTO items (name, weight, category, note) VALUES (?, ?, ?, ?)",
         (name, weight, category, note),
     )
+
+    item_id = conn.cursor.lastrowid
+
     conn.commit()
     conn.close()
 
-    print(f"\n[green]Item '{name}' added successfully![/green]\n")
+    print(f"\n[green]Item '{name}' added successfully with ID {item_id}![/green]\n")
+    return item_id
 
 
 def remove_items_from_collection(collection_id: int, item_ids: List[int]):
@@ -155,13 +162,17 @@ def remove_items_from_collection(collection_id: int, item_ids: List[int]):
     conn.close()
 
     if removed_count > 0:
-        print(
+        rich.print(
             f"\n[green]{removed_count} item(s) removed from collection [italic]{collection_id}[/italic] successfully![/green]")
     if skipped_count > 0:
-        print(f"\n[yellow]{skipped_count} item(s) were not in the collection and were skipped.[/yellow]\n")
+        rich.print(f"\n[yellow]{skipped_count} item(s) were not in the collection and were skipped.[/yellow]\n")
 
 
 def add_items_to_collection(collection_id: int, item_ids: List[int]):
+    if collection_id is None or item_ids is None:
+        print("Error!")
+        raise Exception
+
     conn = Connection(DATABASE)
 
     added_count = 0
@@ -204,7 +215,7 @@ def delete_item(item_id: int):
     )
 
     conn.cursor.execute(
-        "DELETE FROM item WHERE itemID = ?", (item_id,)
+        "DELETE FROM items WHERE id = ?", (item_id,)
     )
 
     conn.commit()
@@ -222,10 +233,32 @@ def delete_collection(collection_id: int):
     )
 
     conn.cursor.execute(
-        "DELETE FROM collection WHERE collectionID = ?", (collection_id,)
+        "DELETE FROM collections WHERE id = ?", (collection_id,)
     )
 
     conn.commit()
     conn.close()
 
     print(f"\n[green]Collection with ID {collection_id} was succesfully removed[/green]\n")
+
+
+def handle_interactive_add():
+    item_ids = []
+    collection_id = None
+
+    items = get_items()
+    rich.print(f"\n[underline]Choose items to add to a collection:[/underline]\n")
+    print_items(items)
+
+    print(f"\nSeparate id's with spaces")
+    response = click.prompt("Item IDs")
+
+    rich.print(f"\n[underline]Choose a collection to add items to:[/underline]\n")
+
+    collections = get_collections()
+    print_collections(collections)
+
+    print()
+    collection_id = click.prompt("Collection ID", type=int)
+
+    add_items_to_collection(collection_id, item_ids)

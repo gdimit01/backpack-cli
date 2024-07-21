@@ -18,7 +18,8 @@ from database import (
     delete_collection,
     remove_items_from_collection,
     handle_interactive_add,
-    get_categories
+    get_categories,
+    handle_interactive_remove
 )
 from export_commands import checklist
 from dataobjects import Collection
@@ -46,8 +47,8 @@ def add():
 
 @add.command()
 @click.argument('item_ids', nargs=-1, type=int, required=False)
-@click.option('--collection', 'collection_id', type=int, help='Collection ID to add items to')
-@click.option('--interactive', is_flag=True, help='Interactive mode to select items and collections')
+@click.option('-c', '--collection', 'collection_id', type=int, help='Collection ID to add items to')
+@click.option('-i', '--interactive', is_flag=True, help='Interactive mode to select items and collections')
 def item(item_ids, collection_id, interactive):
     """
     Add items to a collection.
@@ -78,14 +79,14 @@ def remove():
 
 @remove.command()
 @click.argument('item_ids', nargs=-1, type=int, required=False)
-@click.option('--collection', 'collection_id', type=int, help='Collection ID to remote items from')
-@click.option('--interactive', is_flag=True, help='Interactive mode to select items and collections')
+@click.option('-c', '--collection', 'collection_id', type=int, help='Collection ID to remote items from')
+@click.option('-i', '--interactive', is_flag=True, help='Interactive mode to select items and collections')
 def item(item_ids, collection_id, interactive):
     """
     Remove items from a collection.
     """
     if interactive:
-        handle_interactive_add()
+        handle_interactive_remove()
     else:
         if not item_ids:
             click.echo("You must provide at least one item ID.")
@@ -111,7 +112,7 @@ def view():
 
 @cli.group()
 def list():
-    """List items and collections."""
+    """List items, collections and categories"""
     pass
 
 
@@ -124,6 +125,7 @@ def items():
 
     else:
         rich.print("\n[red]No items found in the database.[/red]\n")
+
 
 @list.command()
 def categories():
@@ -196,9 +198,8 @@ def collection(id):
     if id is None:
         collections = get_collections()
         if collections:
-            print(f"\nAvailable collections [dim]({len(collections)})[/dim]:\n")
-            for collection in collections:
-                print(f"[bold]{collection.id}[/bold] {collection.name}")
+            rich.print(f"\nAvailable collections [dim]({len(collections)})[/dim]:\n")
+            print_collections(collections)
         else:
             click.echo("No collections found in the database")
 

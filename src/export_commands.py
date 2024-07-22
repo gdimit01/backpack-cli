@@ -14,7 +14,7 @@ def checklist(collection_id, output_file, pdf):
     
     COLLECTION_ID: The ID of the collection to export.
     OUTPUT_FILE: The file to write the checklist to.
-    --pdf: Creates a PDF file instead of a markdown file.
+    --pdf: Creates a PDF checklist instead of a markdown checklist.
     """
     try:
         collection = get_collection(collection_id)

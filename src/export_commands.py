@@ -60,16 +60,21 @@ def generate_pdf_checklist(collection, output_file):
     """
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
+    pdf.set_font('DejaVu', size=12)
+    #pdf.set_font("Arial", size=12)
     # Add the collection name and description at the top of the PDF page
-    pdf.cell(200, 10, txt=f"{collection['name']}", ln=1)
-    pdf.cell(200, 10, txt=f"{collection['description']}", ln=1)
+    pdf.set_font('DejaVu', size=18)
+    pdf.cell(200, 10, txt=f"{collection.name}", ln=1)
+
+    pdf.set_font('DejaVu', size=12)
+    pdf.cell(200, 10, txt=f"{collection.description}", ln=1)
 
     # Iterate through each category and its items in the collection
-    for category, items_list in collection['items'].items():
+    for category, items_list in collection.items.items():
         pdf.cell(200, 10, txt=f"{category}", ln=1)
         for item in items_list:
-            pdf.cell(200, 10, txt=f"- {item['name']} ({item['note']})", ln=1)
+            pdf.cell(200, 10, txt=f" ☐ {item.name} ({item.note})", ln=1)
 
     # Save the generated PDF to the specified file
     pdf.output(output_file)

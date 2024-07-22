@@ -33,9 +33,8 @@ def cli():
     pass
 
 
-#  TODO: fix
-# Register the checklist command
-# cli.add_command(checklist)
+# Register the sourced checklist command
+cli.add_command(checklist)
 
 
 #  NOTE: subcommands for 'add'

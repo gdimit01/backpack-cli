@@ -35,14 +35,14 @@ def generate_markdown_checklist(collection):
     Generate a markdown checklist for a given collection.
     """
 
-    checklist = f"# {collection['name']}\n{collection['description']}\n\n"
+    checklist = f"# {collection.name}\n{collection.description}\n\n"
     # Iterate over each category and its items in the collection
-    for category, items_list in collection['items'].items():
+    for category, items_list in collection.items.items():
         checklist += f"### {category}\n\n"
         # Add each item in the category to the markdown list with a checkbox
         for item in items_list:
-            name = pad_string(item['name'], 30)
-            checklist += f"- [ ] {name} ({item['note']})\n"
+            name = pad_string(item.name, 30)
+            checklist += f"- [ ] {name} ({item.note})\n"
         checklist += "\n"
     return checklist
 
